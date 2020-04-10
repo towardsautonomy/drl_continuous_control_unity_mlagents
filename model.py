@@ -39,11 +39,11 @@ class Actor(nn.Module):
 
     def forward(self, state):
         """Build an actor (policy) network that maps states -> actions."""
-        # x = self.bn0(state)
+        x = self.bn0(state)
         x = F.relu(self.fc1(state))
-        # x = self.bn1(x)
+        x = self.bn1(x)
         x = F.relu(self.fc2(x))
-        # x = self.bn2(x)
+        x = self.bn2(x)
         return torch.tanh(self.fc3(x))
 
 class Critic(nn.Module):
@@ -76,10 +76,10 @@ class Critic(nn.Module):
 
     def forward(self, state, action):
         """Build a critic (value) network that maps (state, action) pairs -> Q-values."""
-        # xs = self.bn0(state)
+        xs = self.bn0(state)
         xs = F.relu(self.fcs1(state))
-        # xs = self.bn1(xs)
+        xs = self.bn1(xs)
         x = torch.cat((xs, action), dim=1)
         x = F.relu(self.fc2(x))
-        # x = self.bn2(x)
+        x = self.bn2(x)
         return self.fc3(x)

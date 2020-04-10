@@ -17,7 +17,7 @@ MODE_TRAIN      = 1
 MODE_TEST       = 2
 
 # experiment id
-EXPERIMENT_ID = 'reacher_ddpg_orig'
+EXPERIMENT_ID = 'reacher_ddpg'
 
 # paths
 LOGS_DIR = 'logs/'+EXPERIMENT_ID+'/'
@@ -130,13 +130,13 @@ def ddpg(n_episodes=1000, max_t=500):
             for t in range(max_t):
                 actions = agent.act(states)
                 env_info = env.step(actions)[brain_name]           # send all actions to tne environment
-                next_state = env_info.vector_observations[0]      # get next state (for each agent)
-                reward = env_info.rewards[0]                      # get reward (for each agent)
-                done = env_info.local_done[0]                     # see if episode finished
-                agent.step(state, actions[0], reward, next_state, done)
-                score += env_info.rewards[0]                      # update the score (for each agent)
-                state = next_state                                # roll over states to next time step
-                if done:                                          # exit loop if episode finished
+                next_states = env_info.vector_observations         # get next state (for each agent)
+                rewards = env_info.rewards                         # get reward (for each agent)
+                done = env_info.local_done[0]                      # see if episode finished
+                agent.step(states[0], actions[0], rewards[0], next_states[0], done)
+                score += env_info.rewards[0]                       # update the score (for each agent)
+                states = next_states                               # roll over states to next time step
+                if done:                                           # exit loop if episode finished
                     break
                 print('\rEpisode {}, Step {}\tScore: {:.3f}'.format(i_episode, t, score), end="")
                 mean_score.append(score)
