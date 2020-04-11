@@ -112,7 +112,7 @@ def explore(n_steps=200):
         print('Total score (averaged over agents) this episode: {}'.format(np.mean(scores)))
 
 # Train the agent with DDPG
-def ddpg(n_episodes=1000, max_t=500):
+def ddpg(n_episodes=1000, max_t=500, reset_noise_t=3):
     scores = []
     # open log file
     with open(LOG_FILE, 'w', newline='') as csvfile:
@@ -123,11 +123,13 @@ def ddpg(n_episodes=1000, max_t=500):
         for i_episode in range(1, n_episodes+1):
             # reset the environment and parameters
             env_info = env.reset(train_mode=False)[brain_name]     # reset the environment    
-            agent.reset()
             states = env_info.vector_observations                  # get the current state (for each agent)
             score = 0
             mean_score = []
             for t in range(max_t):
+                # reset noise every few steps to promote exploration
+                if t%reset_noise_t == 0:
+                    agent.reset_noise()
                 actions = agent.act(states)
                 env_info = env.step(actions)[brain_name]           # send all actions to tne environment
                 next_states = env_info.vector_observations         # get next state (for each agent)

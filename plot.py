@@ -3,12 +3,12 @@ import matplotlib.pyplot as plt
 import numpy as np
 
 # log file
-log_dir = 'logs/reacher_ddpg_orig/'
+log_dir = 'logs/reacher_ddpg/'
 log_file = log_dir+'logs.csv'
-log_plot_png = log_dir+'plot.png'
+log_plot_png = log_dir+'plot_test.png'
 
 # moving average
-def moving_average(arr, n=10) :
+def moving_average(arr, n=5) :
     ret = np.cumsum(arr, dtype=float)
     ret[n:] = ret[n:] - ret[:-n]
     return ret / n

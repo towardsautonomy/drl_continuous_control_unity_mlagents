@@ -16,7 +16,7 @@ TAU = 1e-3              # for soft update of target parameters
 LR_ACTOR = 1e-4         # learning rate of the actor 
 LR_CRITIC = 1e-3        # learning rate of the critic
 WEIGHT_DECAY = 0        # L2 weight decay
-DELTA_STEPS = 1         # Update every DELTA_STEPS steps
+DELTA_STEPS = 20         # Update every DELTA_STEPS steps
 
 device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 
@@ -79,7 +79,7 @@ class Agent():
             action += self.noise.sample()
         return np.clip(action, -1, 1)
 
-    def reset(self):
+    def reset_noise(self):
         self.noise.reset()
 
     def learn(self, experiences, gamma):
