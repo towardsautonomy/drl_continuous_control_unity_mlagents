@@ -79,13 +79,9 @@ EPSILON_DECAY = 1e-6    # decay for epsilon above
 
 The agent achieved an average score of **33.4** after **1120** episodes and then the performance started degrading as shown in the plot below. Model weights are saved to file for the episode which achieves the best score so far. This model is later used for testing and it achieves an average score of **32.5** over 100 consecutive episodes. 
 
----
-
 | Training                         |  Testing                                |
 |:--------------------------------:|:---------------------------------------:|
 |![](logs/reacher_ddpg/plot.png)   | ![](logs/reacher_ddpg/test_result.png)  | 
-
----  
 
 This model was used to test the agents within multi-agent environment, and it achieves similar performance.  
 
@@ -99,13 +95,9 @@ To train agents within multi-agent environment,
 
 This model is able to learn much faster and is highly stable. During training, it achieves an average score (over all the agents) of **34** in just **50 episodes**. Testing this model on single agent environment gives an average score of **37.0** over 100 consecutive episodes.
 
----
-
 | Training                         |  Testing                                |
 |:--------------------------------:|:---------------------------------------:|
 |![](logs/reacher_ddpg_multiple_agents/plot.png)   | ![](logs/reacher_ddpg_multiple_agents/test_plot.png)  | 
-
----  
 
 ## 06. Running the Code  
 
@@ -148,6 +140,6 @@ The option ```--multi_agent``` is used to explore/train/test the Multi-Agent env
 
 ---
 
-## 06. Future Improvements
+## 06. Future Work
 
 As evident by the [Benchmarking Deep Reinforcement Learning for Continuous Control](https://arxiv.org/abs/1604.06778) paper, [Trust Region Policy Optimization (TRPO)](https://arxiv.org/abs/1502.05477) could be a better choice for policy optimization. TRPO will be used in future for benchmarking against DDPG on these environments.
