@@ -33,7 +33,7 @@ Two separate versions of the Unity environment is used:
 
 The task is episodic, and in order to solve the environment, the agent must get an average score of +30 over 100 consecutive episodes.
 
-#### Second Version / Training with Multiple Agent
+#### Second Version / Training with Multiple Agents
 
 The barrier for solving the second version of the environment is slightly different, to take into account the presence of many agents. In particular, the agents must get an average score of +30 (over 100 consecutive episodes, and over all agents). Specifically,  
 - After each episode, the rewards that each agent received (without discounting) is added up, to get a score for each agent. This yields 20 (potentially different) scores. Then, the average of these 20 scores are taken.  
