@@ -10,13 +10,16 @@ import torch.nn.functional as F
 import torch.optim as optim
 
 BUFFER_SIZE = int(1e6)  # replay buffer size
-BATCH_SIZE = 64         # minibatch size
+BATCH_SIZE = 512        # minibatch size
 GAMMA = 0.99            # discount factor
 TAU = 1e-3              # for soft update of target parameters
 LR_ACTOR = 1e-4         # learning rate of the actor 
 LR_CRITIC = 1e-3        # learning rate of the critic
 WEIGHT_DECAY = 0        # L2 weight decay
-DELTA_STEPS = 20         # Update every DELTA_STEPS steps
+DELTA_STEPS = 20        # Update every DELTA_STEPS steps
+NUM_UPDATES = 10        # num of update passes when updating
+EPSILON = 1.0           # epsilon for the noise process added to the actions
+EPSILON_DECAY = 1e-6    # decay for epsilon above
 
 device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 
@@ -47,10 +50,15 @@ class Agent():
         self.critic_optimizer = optim.Adam(self.critic_local.parameters(), lr=LR_CRITIC, weight_decay=WEIGHT_DECAY)
 
         # Noise process
+        self.epsilon = EPSILON
         self.noise = OUNoise(action_size, random_seed)
 
         # Replay memory
         self.memory = ReplayBuffer(action_size, BUFFER_SIZE, BATCH_SIZE, random_seed)
+
+        # make sure local and target have the same weight 
+        self.soft_update(self.critic_local, self.critic_target, 1.0)
+        self.soft_update(self.actor_local, self.actor_target, 1.0)     
 
         # Initialize time step (for updating every DELTA_STEPS steps)
         self.t_step = 0
@@ -65,8 +73,9 @@ class Agent():
 
         # Learn every DELTA_STEPS steps, if enough samples are available in memory
         if (len(self.memory) > BATCH_SIZE) and (self.t_step == 0):
-            experiences = self.memory.sample()
-            self.learn(experiences, GAMMA)
+            for _ in range(NUM_UPDATES):
+                experiences = self.memory.sample()
+                self.learn(experiences, GAMMA)
 
     def act(self, state, add_noise=True):
         """Returns actions for given state as per current policy."""
@@ -76,7 +85,10 @@ class Agent():
             action = self.actor_local(state).cpu().data.numpy()
         self.actor_local.train()
         if add_noise:
-            action += self.noise.sample()
+            # update epsilon
+            self.epsilon = self.epsilon * EPSILON_DECAY
+            # add noise to the action
+            action += self.epsilon * self.noise.sample()
         return np.clip(action, -1, 1)
 
     def reset_noise(self):
