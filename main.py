@@ -203,14 +203,14 @@ def main(mode=MODE_EXPLORE):
 if __name__ == '__main__':
     # get command line arguments
     parser = argparse.ArgumentParser()
-    parser.add_argument("--multi_agent", help="choose the multi-agent environment", action='store_true')
+    parser.add_argument("--multi_agents", help="choose the multi-agent environment", action='store_true')
     parser.add_argument("--explore", help="explore the environment", action='store_true')
     parser.add_argument("--train", help="train the DDPG agent", action='store_true')
     parser.add_argument("--test", help="test the DDPG agent", action='store_true')
     args = parser.parse_args()
 
     # setup the model using config parameters
-    if args.multi_agent:
+    if args.multi_agents:
         USE_MULTI_AGENT_ENV = True
     if args.explore:
         MODE = MODE_EXPLORE

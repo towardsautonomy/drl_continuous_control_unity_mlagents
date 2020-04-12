@@ -102,24 +102,24 @@ This model is able to learn much faster and is highly stable. During training, i
 ## 06. Running the Code  
 
 ```
-usage: main.py [-h] [--multi_agent] [--explore] [--train] [--test]
+usage: main.py [-h] [--multi_agents] [--explore] [--train] [--test]
 
 optional arguments:
   -h, --help     show this help message and exit
-  --multi_agent  choose the multi-agent environment
+  --multi_agents  choose the multi-agent environment
   --explore      explore the environment
   --train        train the DDPG agent
   --test         test the DDPG agent
 ```
 
-The option ```--multi_agent``` is used to explore/train/test the Multi-Agent environment. Single-Agent environment is used by default.   
+The option ```--multi_agents``` is used to explore/train/test the Multi-Agent environment. Single-Agent environment is used by default.   
 
 #### Explore  
 
  - Explore the environment:  
 
     ```
-    python main.py --explore [--multi_agent]
+    python main.py --explore [--multi_agents]
     ```
 
 #### Training  
@@ -127,7 +127,7 @@ The option ```--multi_agent``` is used to explore/train/test the Multi-Agent env
  - Train the agents:  
 
     ```
-    python main.py --train [--multi_agent]
+    python main.py --train [--multi_agents]
     ```
 
 #### Testing 
@@ -135,7 +135,7 @@ The option ```--multi_agent``` is used to explore/train/test the Multi-Agent env
  - Test the agents:  
 
     ```
-    python main.py --test [--multi_agent]
+    python main.py --test [--multi_agents]
     ```
 
 ---
