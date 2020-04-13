@@ -1,8 +1,8 @@
-# DDPG for Continuous Controls - Training Multiple AI Agents within Unity framework 
+# Continuous Control using DRL - Training Multiple AI Agents within Unity framework 
 
 ## 01. Introduction
 
-This project demonstrates the use of Deep Deterministic Policy Gradient (DDPG) for training AI agents to perform continuous controls. I work with a couple of Unity ML-Agents environment to teach single-agent and multiple-agents in both independent and competitive settings.
+This project demonstrates the use of Deep Reinforcement Learning for training AI agents to perform continuous controls. I work with a couple of Unity ML-Agents environment to teach single-agent and multiple-agents in both independent and competitive settings. Deep Deterministic Policy Gradient (DDPG) policy optimization technique is used for all the tasks.
 
 ## 02. Environments
 
