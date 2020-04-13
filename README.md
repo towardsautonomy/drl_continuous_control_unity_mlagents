@@ -11,7 +11,7 @@ This project demonstrates the use of Deep Reinforcement Learning for training AI
 ### a. [Tennis](https://github.com/Unity-Technologies/ml-agents/blob/master/docs/Learning-Environment-Examples.md#tennis) environment for training two agents to play against each other in a competitive manner.
 
 ![](results/untrained_tennis.gif)  
-*Figure - Untrained Tennis Agents* 
+*Figure - Untrained Agents in Tennis Environment* 
 
 ![](results/tennis.gif)  
 *Figure - Testing the Agents after training the agents for 1800 episodes*
@@ -39,7 +39,7 @@ The agent achieved an average score of **0.62** after **1803** episodes. The ave
 | Single Agent                         |  Multiple Agents                      |
 |:------------------------------------:|:-------------------------------------:|
 |![](results/reacher_single_untrained_agent.gif)  | ![](results/reacher_multi_untrained_agents.gif)   |  
-| *Figure - Single Untrained Agent* | *Figure - Multiple Untrained Agents* |
+| *Figure - Single Untrained Agent in Reacher Environment* | *Figure - Multiple Untrained Agents in Reacher Environment* |
 |![](results/reacher_single_agent.gif)  | ![](results/reacher_multi_agents.gif)   |  
 | *Figure - Testing on Single Agent after training a single agent for 1200 episodes* | *Figure - Testing on Multiple Agents after training a single agent for 1200 episodes* |
 |![](results/reacher_single_agent_trained_on_multi_agents.gif)  | ![](results/reacher_multi_agents_trained_on_multi_agents.gif)   |  
