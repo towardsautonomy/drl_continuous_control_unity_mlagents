@@ -39,8 +39,8 @@ class Actor(nn.Module):
 
     def forward(self, state):
         """Build an actor (policy) network that maps states -> actions."""
-        # x = self.bn0(state)
-        x = F.relu(self.fc1(state))
+        x = self.bn0(state)
+        x = F.relu(self.fc1(x))
         # x = self.bn1(x)
         x = F.relu(self.fc2(x))
         # x = self.bn2(x)
@@ -67,6 +67,7 @@ class Critic(nn.Module):
         self.fc2 = nn.Linear(fcs1_units+action_size, fc2_units)
         self.bn2 = nn.BatchNorm1d(fc2_units)
         self.fc3 = nn.Linear(fc2_units, 1)
+        self.dropout = nn.Dropout(p=0.2)
         self.reset_parameters()
 
     def reset_parameters(self):
@@ -76,10 +77,11 @@ class Critic(nn.Module):
 
     def forward(self, state, action):
         """Build a critic (value) network that maps (state, action) pairs -> Q-values."""
-        # xs = self.bn0(state)
-        xs = F.relu(self.fcs1(state))
+        xs = self.bn0(state)
+        xs = F.relu(self.fcs1(xs))
         # xs = self.bn1(xs)
         x = torch.cat((xs, action), dim=1)
         x = F.relu(self.fc2(x))
         # x = self.bn2(x)
+        x = self.dropout(x)
         return self.fc3(x)

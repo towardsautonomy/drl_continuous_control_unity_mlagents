@@ -9,8 +9,10 @@ import matplotlib.pyplot as plt
 import csv
 import os
 import argparse
+import time
 # import the agent
 from ddpg_agent import Agent
+from agent_env import *
 
 # define modes
 MODE_EXPLORE    = 0
@@ -19,20 +21,13 @@ MODE_TEST       = 2
 
 ## ---------------- Config Parameters -------
 # experiment id
-EXPERIMENT_ID = 'reacher_ddpg_multiple_agents'
-SINGLE_AGENT_ENV = 'Reacher_SingleAgent_Linux/Reacher.x86_64'
-MULTI_AGENT_ENV = 'Reacher_MultiAgent_Linux/Reacher.x86_64'
-# Single vs Multi-Agent Environment
-USE_MULTI_AGENT_ENV = False
+EXPERIMENT_ID = ''
+
+# number of episodes
+N_EPISODES = 2000
+
 # Program mode
 MODE = MODE_TEST
-# Score threshold for deciding if the environment was solved
-SCORE_THRES_ENV_SOLVED = 30.0
-# pretrained weights; set to None if not using pretrained weights
-# PRETRAINED_WEIGHTS_ACTOR = None
-# PRETRAINED_WEIGHTS_CRITIC = None
-PRETRAINED_WEIGHTS_ACTOR = 'weights/reacher_ddpg_multiple_agents/checkpoint_actor.pth'
-PRETRAINED_WEIGHTS_CRITIC = 'weights/reacher_ddpg_multiple_agents/checkpoint_critic.pth'
 ##-------------------------------------------
 
 # moving average
@@ -45,36 +40,38 @@ def moving_average(arr, n=50) :
     return ret / idx
 
 # explore environment by taking random actions
-def explore(n_steps=1000):
+def explore(n_episodes=100, n_steps=1000):
     # reset the environment and parameters
     env_info = env.reset(train_mode=False)[brain_name]     # reset the environment    
     states = env_info.vector_observations                  # get the current state (for each agent)
     scores = []
-    for _ in range(n_steps):
-        actions = np.random.randn(num_agents, action_size) # select an action (for each agent)
-        actions = np.clip(actions, -1, 1)                  # all actions between -1 and 1
-        env_info = env.step(actions)[brain_name]           # send all actions to tne environment
-        next_states = env_info.vector_observations         # get next state (for each agent)
-        rewards = env_info.rewards                         # get reward (for each agent)
-        dones = env_info.local_done                        # see if episode finished
-        scores.append(env_info.rewards)                    # update the score (for each agent)
-        states = next_states                               # roll over states to next time step
-        if np.any(dones):                                  # exit loop if episode finished
-            break
-        print('Total score (averaged over agents) this episode: {}'.format(np.mean(scores)))
+    for i_episode in range(1, n_episodes+1):
+        for _ in range(n_steps):
+            actions = np.random.randn(num_agents, action_size) # select an action (for each agent)
+            actions = np.clip(actions, -1, 1)                  # all actions between -1 and 1
+            env_info = env.step(actions)[brain_name]           # send all actions to tne environment
+            next_states = env_info.vector_observations         # get next state (for each agent)
+            rewards = env_info.rewards                         # get reward (for each agent)
+            dones = env_info.local_done                        # see if episode finished
+            scores.append(env_info.rewards)                    # update the score (for each agent)
+            states = next_states                               # roll over states to next time step
+            if np.any(dones):                                  # exit loop if episode finished
+                break
 
 # Train the agent with DDPG
-def train_agent(n_episodes=3000, max_t=1000, reset_noise_t=100):
-    scores_deque = deque(maxlen=100)
+def train_agent(n_episodes=2000, max_t=5000, reset_noise_t=100):
+    n_episodes_avg = 100
+    scores_deque = deque(maxlen=n_episodes_avg)
     scores_global = []
-    best_score = 0
+    best_score = -100.0
     # open log file
     with open(LOG_FILE, 'w', newline='') as csvfile:
-        fieldnames = ['episode', 'score']
+        fieldnames = ['episode', 'score', 'avg_score']
         writer = csv.DictWriter(csvfile, fieldnames=fieldnames)
         writer.writeheader()
 
         for i_episode in range(1, n_episodes+1):
+            start_time = time.time()
             # reset the environment and parameters
             env_info = env.reset(train_mode=True)[brain_name]     # reset the environment    
             # reset noise
@@ -98,34 +95,36 @@ def train_agent(n_episodes=3000, max_t=1000, reset_noise_t=100):
                 states = next_states                               # roll over states to next time step
                 if np.any(dones):                                  # exit loop if episode finished
                     break
-                print('\rEpisode {}, Step {}\tScore: {:.3f}'.format(i_episode, t, np.mean(scores)), end="")
-
+                print('\rEpisode: {}\t| Step: {}\t| Score: {:.3f}'.format(i_episode, t, np.mean(scores)), end="")
+            
+            time_taken = (time.time() - start_time)
             scores_deque.append(np.mean(scores))
             mean_score = np.mean(scores_deque)
             scores_global.append(np.mean(scores))
             print('\r                                                      ', end="")
-            print('\rEpisode {}\tAverage Score: {:.3f}'.format(i_episode, mean_score))
-            writer.writerow({'episode': i_episode, 'score': mean_score})
+            print('\rEpisode: {}\t| Score: {:.3f}\t| Average Score ({} episodes): {:.3f}\t | Time Taken: {:.2f}s'.format(i_episode, np.mean(scores), n_episodes_avg, mean_score, time_taken))
+            writer.writerow({'episode': i_episode, 'score': np.mean(scores), 'avg_score': mean_score})
 
-            if mean_score >= best_score:
+            if np.mean(scores) >= best_score:
                 print('Best score achieved. Saving model weights.')
-                best_score = mean_score
+                best_score = np.mean(scores)
                 torch.save(agent.actor_local.state_dict(), WEIGHTS_ACTOR)
                 torch.save(agent.critic_local.state_dict(), WEIGHTS_CRITIC)
 
             # Keep higher threshold during training
-            if mean_score > (SCORE_THRES_ENV_SOLVED+5.0):
+            if mean_score > (SCORE_THRES_ENV_SOLVED+(0.2*SCORE_THRES_ENV_SOLVED)):
                 print('\nEnvironment solved in {} episodes.\tAverage Score: {:.3f}'.format(i_episode, mean_score))
                 break
             
-    return scores_global
+    return i_episode, scores_global
 
 # Test the agent with DDPG
-def test_agent(n_episodes=100, max_t=1000):
-    scores_deque = deque(maxlen=100)
+def test_agent(n_episodes=100, max_t=5000):
+    n_episodes_avg = 100
+    scores_deque = deque(maxlen=n_episodes_avg)
     for i_episode in range(1, n_episodes+1):
         # reset the environment and parameters
-        env_info = env.reset(train_mode=True)[brain_name]     # reset the environment    
+        env_info = env.reset(train_mode=False)[brain_name]     # reset the environment    
         states = env_info.vector_observations                  # get the current state (for each agent)
         scores = np.zeros(num_agents)                          # initialize the score (for each agent)
         mean_score = []
@@ -139,12 +138,13 @@ def test_agent(n_episodes=100, max_t=1000):
             states = next_states                               # roll over states to next time step
             if np.any(dones):                                  # exit loop if episode finished
                 break
-            print('\rStep {}  \tScore: {:.3f}'.format(t, np.mean(scores)), end="")
+            print('\rEpisode: {}\t| Step: {}\t| Score: {:.3f}'.format(i_episode, t, np.mean(scores)), end="")
             mean_score.append(scores)
 
         mean_score = np.mean(mean_score)
         scores_deque.append(mean_score)
-        print('\rEpisode {} Average Score: {:.3f}\n'.format(i_episode, mean_score), end="")
+        print('\r                                                      ', end="")
+        print('\rEpisode: {}\t| Score: {:.3f}\t| Average Score ({} episodes): {:.3f}'.format(i_episode, mean_score, n_episodes_avg, np.mean(scores_deque)))
 
     if(np.mean(scores_deque) > SCORE_THRES_ENV_SOLVED):
         print('Environment solved.')
@@ -154,19 +154,17 @@ def test_agent(n_episodes=100, max_t=1000):
     return scores_deque
 
 # main function
-def main(mode=MODE_EXPLORE):
+def main(mode, n_episodes):
     if mode == MODE_EXPLORE:
         explore()
     elif mode == MODE_TRAIN:
-        # if num_agents == 1:
-        n_episodes = 2000
-        scores = train_agent(n_episodes=n_episodes)
+        n_episodes, scores = train_agent(n_episodes=n_episodes)
 
         # close the environment
         env.close()
 
         # get moving average of score
-        score_ma = moving_average(scores, n=5)
+        score_ma = moving_average(scores, n=100)
         # plot 
         plt.figure(figsize=(16,9))
         plt.title('Agent Performance', fontweight='bold')
@@ -180,7 +178,6 @@ def main(mode=MODE_EXPLORE):
         plt.show()
 
     elif mode == MODE_TEST:
-        n_episodes = 100
         scores = test_agent(n_episodes=n_episodes)
 
         # close the environment
@@ -203,33 +200,51 @@ def main(mode=MODE_EXPLORE):
 if __name__ == '__main__':
     # get command line arguments
     parser = argparse.ArgumentParser()
-    parser.add_argument("--multi_agents", help="choose the multi-agent environment", action='store_true')
+    parser.add_argument("--env", help="environment to be used", default="tennis")
     parser.add_argument("--explore", help="explore the environment", action='store_true')
     parser.add_argument("--train", help="train the DDPG agent", action='store_true')
     parser.add_argument("--test", help="test the DDPG agent", action='store_true')
+    parser.add_argument("--n_episodes", help="number of episodes", default=2000, type=int)
     args = parser.parse_args()
 
     # setup the model using config parameters
-    if args.multi_agents:
-        USE_MULTI_AGENT_ENV = True
+    if args.env == 'reacher_single':
+        agent_env_dict = env_dict[IDX_ENV_REACHER_SINGLE_AGENT]
+    elif args.env == 'reacher_multi':
+        agent_env_dict = env_dict[IDX_ENV_REACHER_MULTI_AGENTS]
+    elif args.env == 'crawler':
+        agent_env_dict = env_dict[IDX_ENV_CRAWLER]
+    elif args.env == 'tennis':
+        agent_env_dict = env_dict[IDX_ENV_TENNIS]
+    else:
+        raise('unknown agent environment')
+    
+    # Agent environment
+    AGENT_ENV = agent_env_dict['env']
+    # Prefix
+    RUN_ID_PREFIX = agent_env_dict['prefix']
+    # Score threshold for deciding if the environment was solved
+    SCORE_THRES_ENV_SOLVED = agent_env_dict['solved_score_thres']
+    # Pretrained weights
+    PRETRAINED_WEIGHTS_ACTOR = agent_env_dict['pretrained_weights_actor']
+    PRETRAINED_WEIGHTS_CRITIC = agent_env_dict['pretrained_weights_critic']
+
+    N_EPISODES = args.n_episodes
+
     if args.explore:
         MODE = MODE_EXPLORE
     if args.train:
         MODE = MODE_TRAIN
     if args.test:
         MODE = MODE_TEST
+        N_EPISODES = 100
+
 
     # paths
+    EXPERIMENT_ID = RUN_ID_PREFIX+EXPERIMENT_ID
     LOGS_DIR = 'logs/'+EXPERIMENT_ID+'/'
     WEIGHTS_DIR = 'weights/'+EXPERIMENT_ID+'/'
     LOG_FILE = LOGS_DIR+'logs.csv'
-
-    # Choose agent environment
-    AGENT_ENV = None
-    if USE_MULTI_AGENT_ENV == True:
-        AGENT_ENV = MULTI_AGENT_ENV
-    else:
-        AGENT_ENV = SINGLE_AGENT_ENV
 
     # make directories
     os.system('mkdir -p '+LOGS_DIR)
@@ -263,9 +278,7 @@ if __name__ == '__main__':
     print('There are {} agents. Each observes a state with length: {}'.format(states.shape[0], state_size))
     print('The state for the first agent looks like:', states[0])
 
-    # Instantiate all agents
-    agent = None
-    # if num_agents == 1:
+    # Instantiate the agent
     agent = Agent(state_size=state_size, action_size=action_size, random_seed=2)
 
     # load the Actor weights from file
@@ -279,4 +292,4 @@ if __name__ == '__main__':
         agent.critic_target.load_state_dict(torch.load(PRETRAINED_WEIGHTS_CRITIC, map_location=lambda storage, loc: storage))
 
     # run the main function
-    main(mode=MODE)
+    main(mode=MODE, n_episodes=N_EPISODES)
