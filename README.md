@@ -8,7 +8,24 @@ This project demonstrates the use of Deep Reinforcement Learning for training AI
 
 ---
 
-### a. [Tennis](https://github.com/Unity-Technologies/ml-agents/blob/master/docs/Learning-Environment-Examples.md#tennis) environment for training two agents to play against each other in a competitive manner.
+### a. [Crawler](https://github.com/Unity-Technologies/ml-agents/blob/master/docs/Learning-Environment-Examples.md#crawler) A creature with 4 arms and 4 forearms.
+
+![](results/crawler.gif)  
+*Figure - Trained Crawler Agent* 
+
+In this environment, The agents must move its body toward the goal direction without falling. The environment has 12 agents, each observes a state with length 129, and outputs a vector of action of size 12. This task is episodic.
+
+#### Training the Agent[s]    
+
+The agent achieved an average score of **93.0** after **4300** episodes. The average score was computed over 100 consecutive episodes. Model weights are saved to file for the episode which achieves the best score so far. This model is later used for testing and it achieves an average score of **110.2** over 100 consecutive episodes. 
+
+| Training                         |  Testing                                |
+|:--------------------------------:|:---------------------------------------:|
+|![](logs/crawler/plot.png)         | ![](logs/crawler/test_plot.png)  | 
+
+---
+
+### b. [Tennis](https://github.com/Unity-Technologies/ml-agents/blob/master/docs/Learning-Environment-Examples.md#tennis) environment for training two agents to play against each other in a competitive manner.
 
 ![](results/untrained_tennis.gif)  
 *Figure - Untrained Agents in Tennis Environment* 
@@ -34,7 +51,7 @@ The agent achieved an average score of **0.62** after **1803** episodes. The ave
 
 ---
 
-### b. [Reacher](https://github.com/Unity-Technologies/ml-agents/blob/master/docs/Learning-Environment-Examples.md#reacher) environment for training Single and Multiple agents.
+### c. [Reacher](https://github.com/Unity-Technologies/ml-agents/blob/master/docs/Learning-Environment-Examples.md#reacher) environment for training Single and Multiple agents.
 
 | Single Agent                         |  Multiple Agents                      |
 |:------------------------------------:|:-------------------------------------:|
@@ -129,7 +146,15 @@ EPSILON = 1.0           # epsilon for the noise process added to the actions
 EPSILON_DECAY = 1e-6    # decay for epsilon above
 ```
 
-## 04. Running the Code  
+## 04. Getting Started
+
+#### Install requirements within conda environment 
+
+```
+conda env create -f environment.yml
+```
+
+#### Running the main script
 
 ```
 usage: main.py [-h] [--env ENV] [--explore] [--train] [--test]

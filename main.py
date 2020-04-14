@@ -23,9 +23,6 @@ MODE_TEST       = 2
 # experiment id
 EXPERIMENT_ID = ''
 
-# number of episodes
-N_EPISODES = 2000
-
 # Program mode
 MODE = MODE_TEST
 ##-------------------------------------------
@@ -184,7 +181,7 @@ def main(mode, n_episodes):
         env.close()
 
         # get moving average of score
-        score_ma = moving_average(scores, n=20)
+        score_ma = moving_average(scores, n=30)
         # plot 
         plt.figure(figsize=(16,9))
         plt.title('Agent Performance', fontweight='bold')
@@ -238,7 +235,6 @@ if __name__ == '__main__':
     if args.test:
         MODE = MODE_TEST
         N_EPISODES = 100
-
 
     # paths
     EXPERIMENT_ID = RUN_ID_PREFIX+EXPERIMENT_ID

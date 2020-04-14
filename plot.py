@@ -3,7 +3,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 
 # log file
-log_dir = 'logs/tennis_1/'
+log_dir = 'logs/crawler/'
 log_file = log_dir+'logs.csv'
 log_plot_png = log_dir+'plot.png'
 

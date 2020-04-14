@@ -35,7 +35,7 @@ env_dict = [{
                 'pretrained_weights_critic':'weights/tennis/checkpoint_critic.pth'
             }]
 
-# env indexes
+# env indices
 IDX_ENV_REACHER_SINGLE_AGENT    = 0
 IDX_ENV_REACHER_MULTI_AGENTS    = 1
 IDX_ENV_CRAWLER                 = 2
